@@ -48,15 +48,21 @@ def add_code(descnode, vocabs)
           next
        end
    added_code = true
+     if !code.is_a?(Array)
+        codea = [code]
+     else
+        codea = code 
+     end
    $vocab = vocab
+   codea.each do |code|
    $value = code
      Nokogiri::XML::Builder.with(descnode) do |xml|
         xml.Code {
            xml.CodingSystem $vocab
            xml.value $value
         }
-    
     end
+  end
 
 #   STDERR.puts "Updated: #{descnode.document.root}"
    end
@@ -140,7 +146,7 @@ def find_uncoded_encounters(doc)
         text = encounter.xpath("./Description/Text")[0].content
 #        STDERR.puts "*Encounter Code: #{codes}"
         found_code = false
-        if codes 
+        if codes
             codes.each do | code | 
               normalize_coding_system(code)
               if code.xpath("./Value")[0].content != "0" &&
@@ -276,7 +282,12 @@ def process_doc(doc)
     end
     STDERR.puts "e: #{uncoded_encounters.size} prod: #{uncoded_products.size}  prob: #{uncoded_problems.size} v: #{uncoded_vital_results.size} t: #{uncoded_test_results.size} a: #{uncoded_alerts.size}"
 end
-
+   if ARGV.size < 3
+     STDERR.puts "jruby xpath.rb <indir> <outdir> <outjsonfile> <injsonfile>"
+     STDERR.puts " the last argument is optional. If present, symbols will be looked up in that hash"
+     STDERR.puts "The third argument, outjsonfile, is a json hash of undefined symbols"
+     exit
+   end
 
    indir = ARGV[0]
    outdir = ARGV[1]
@@ -306,6 +317,8 @@ end
        doc = Nokogiri::XML(File.open("#{indir}/#{item}") ) 
        process_doc(doc)
        outfp = File.open("#{outdir}/#{item}","w")
+#       doc.root.add_namespace_definition('', "urn:astm-org:CCR")
+
        outfp.puts doc.root
       outfp.close
      end 

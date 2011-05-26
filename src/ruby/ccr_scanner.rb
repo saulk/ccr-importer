@@ -59,7 +59,7 @@ summaryps = PrintStream.new(FileOutputStream.new(summaryfn))
  scan = Scanner.new(summaryps)
 
 Dir.glob(ccr_dir + '/*.xml').each do |ccr_file|
-#  STDOUT.puts "Processing #{ccr_file}"
+  STDOUT.puts "Processing #{ccr_file}"
   ccr = unmarshaller.unmarshal(FileInputStream.new(ccr_file))
   new_ccr = scan.pre_process(ccr)
   fw = FileWriter.new(clean_dir + '/' + File.basename(ccr_file))
